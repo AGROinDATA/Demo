@@ -1,0 +1,223 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Juego AGROinDATA</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #e5ddd5;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+        }
+        .chat-container {
+            width: 90%;
+            max-width: 400px;
+            background-color: #fff;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+            padding: 20px;
+            position: relative;
+        }
+        .header {
+            font-weight: bold;
+            font-size: 20px;
+            color: white;
+            background-color: #128C7E;
+            padding: 10px;
+            border-radius: 10px 10px 0 0;
+            text-align: center;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .header img {
+            width: 30px;
+            height: 30px;
+            margin-left: 10px;
+        }
+        .progress-bar {
+            height: 5px;
+            background-color: #e5ddd5;
+            border-radius: 5px;
+            overflow: hidden;
+            margin-top: 10px;
+        }
+        .progress-bar-fill {
+            height: 100%;
+            background-color: #25D366;
+            width: 0;
+        }
+        .chat-box {
+            max-height: 300px;
+            overflow-y: auto;
+            margin-top: 10px;
+            border-bottom: 1px solid #ddd;
+            padding-bottom: 10px;
+        }
+        .chat-bubble {
+            background-color: #dcf8c6;
+            padding: 10px;
+            border-radius: 10px;
+            margin: 5px 0;
+            width: fit-content;
+            max-width: 80%;
+        }
+        .options-container {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            margin-top: 10px;
+        }
+        .option-button {
+            background-color: #128C7E;
+            color: white;
+            padding: 10px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-weight: bold;
+        }
+        .game-button {
+            background-color: #25D366;
+            color: white;
+            padding: 10px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-weight: bold;
+        }
+        .game-button:disabled {
+            background-color: #b5b5b5;
+        }
+        .score-container {
+            font-weight: bold;
+            text-align: center;
+            margin-top: 10px;
+        }
+        .advertisement {
+            color: #128C7E;
+            font-weight: bold;
+            font-size: 14px;
+            text-align: center;
+            margin-top: 20px;
+        }
+        .icon {
+            width: 20px;
+            height: 20px;
+            vertical-align: middle;
+        }
+    </style>
+</head>
+<body>
+
+<div class="chat-container">
+    <div class="header">
+        Juego AGROinDATA
+        <img src="https://agroindata.com/images/logo.jpg" alt="AgroinDATA Logo">
+    </div>
+    <div class="progress-bar">
+        <div class="progress-bar-fill" id="progressFill"></div>
+    </div>
+    <div class="chat-box" id="chatBox"></div>
+    <div class="score-container" id="scoreContainer">Puntaje: 0/10</div>
+    <div class="options-container" id="optionsContainer">
+        <button class="option-button" onclick="selectAnswer('A')" id="optionA">Opción A</button>
+        <button class="option-button" onclick="selectAnswer('B')" id="optionB">Opción B</button>
+        <button class="option-button" onclick="selectAnswer('C')" id="optionC">Opción C</button>
+    </div>
+    <div class="options-container">
+        <button class="game-button" onclick="nextQuestion()" id="nextButton" disabled>Siguiente</button>
+        <button class="game-button" onclick="resetGame()">Reiniciar</button>
+    </div>
+    <div class="advertisement">
+        Explora más en <a href="https://www.agroindata.com" target="_blank">www.agroindata.com</a>
+    </div>
+</div>
+
+<script>
+    const questions = [
+        { question: "1. ¿Qué porcentaje de agua contiene un tomate?", options: { A: "90%", B: "75%", C: "85%" }, correct: "A" },
+        { question: "2. ¿Qué nutriente es esencial para la fotosíntesis?", options: { A: "Calcio", B: "Nitrógeno", C: "Potasio" }, correct: "B" },
+        { question: "3. ¿Qué tipo de suelo retiene más agua?", options: { A: "Arenoso", B: "Arcilloso", C: "Limoso" }, correct: "B" },
+        { question: "4. ¿Cuál es el pH ideal para la mayoría de los cultivos?", options: { A: "6-7", B: "4-5", C: "7-8" }, correct: "A" },
+        { question: "5. ¿Cuál es el método de riego más eficiente?", options: { A: "Goteo", B: "Inundación", C: "Aspersión" }, correct: "A" },
+        { question: "6. ¿Qué nutriente fortalece la resistencia de las plantas?", options: { A: "Potasio", B: "Hierro", C: "Magnesio" }, correct: "A" },
+        { question: "7. ¿Cuál es la mejor hora para regar?", options: { A: "Mediodía", B: "Amanecer", C: "Tarde" }, correct: "B" },
+        { question: "8. ¿Cuál es la unidad de medida de la fertilidad del suelo?", options: { A: "pH", B: "Lux", C: "Humus" }, correct: "A" },
+        { question: "9. ¿Qué planta fija nitrógeno en el suelo?", options: { A: "Maíz", B: "Legumbres", C: "Trigo" }, correct: "B" },
+        { question: "10. ¿Qué es un invernadero?", options: { A: "Un edificio para almacenar agua", B: "Un espacio protegido para plantas", C: "Una zona de almacenamiento de fertilizantes" }, correct: "B" }
+    ];
+
+    let currentQuestionIndex = 0;
+    let score = 0;
+
+    function displayQuestion() {
+        const questionObj = questions[currentQuestionIndex];
+        const chatBox = document.getElementById("chatBox");
+        chatBox.innerHTML += `<div class="chat-bubble">🌱 <img src="https://agroindata.com/images/logo.jpg" class="icon" alt="AgroinDATA Logo"> ${questionObj.question}</div>`;
+        document.getElementById("optionA").innerText = `A: ${questionObj.options.A}`;
+        document.getElementById("optionB").innerText = `B: ${questionObj.options.B}`;
+        document.getElementById("optionC").innerText = `C: ${questionObj.options.C}`;
+        document.getElementById("nextButton").disabled = true;
+        chatBox.scrollTop = chatBox.scrollHeight; // Mueve al final del chat
+    }
+
+    function selectAnswer(answer) {
+        const questionObj = questions[currentQuestionIndex];
+        const chatBox = document.getElementById("chatBox");
+
+        if (answer === questionObj.correct) {
+            score++;
+            chatBox.innerHTML += `<div class="chat-bubble" style="background-color: #25D366;">✅ Correcto!</div>`;
+        } else {
+            chatBox.innerHTML += `<div class="chat-bubble" style="background-color: #ff4d4d;">❌ Incorrecto. La respuesta era: ${questionObj.correct}</div>`;
+        }
+
+        document.getElementById("nextButton").disabled = false;
+        updateScore();
+        updateProgress();
+        chatBox.scrollTop = chatBox.scrollHeight;
+    }
+
+    function nextQuestion() {
+        currentQuestionIndex++;
+        if (currentQuestionIndex < questions.length) {
+            displayQuestion();
+        } else {
+            showFinalMessage();
+        }
+    }
+
+    function updateScore() {
+        document.getElementById("scoreContainer").innerText = `Puntaje: ${score}/10`;
+    }
+
+    function updateProgress() {
+        const progressFill = document.getElementById("progressFill");
+        progressFill.style.width = ((currentQuestionIndex + 1) / questions.length) * 100 + "%";
+    }
+
+    function showFinalMessage() {
+        const chatBox = document.getElementById("chatBox");
+        chatBox.innerHTML += `<div class="chat-bubble">🎉 ¡Felicidades! Tu puntaje final es ${score}/10. 🌱 ¿Qué te pareció el juego? ¿Te gustaría tener un juego personalizado para capacitación agrícola? 🌾</div>`;
+    }
+
+    function resetGame() {
+        currentQuestionIndex = 0;
+        score = 0;
+        document.getElementById("chatBox").innerHTML = '';
+        displayQuestion();
+        updateScore();
+        updateProgress();
+    }
+
+    // Inicia el juego
+    displayQuestion();
+</script>
+</body>
+</html>
